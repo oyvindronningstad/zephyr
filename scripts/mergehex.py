@@ -26,8 +26,8 @@ def merge_hex_files(output, input_hex_files):
 
         try:
             ih.merge(to_merge)
-        except AddressOverlapError:
-            raise AddressOverlapError("{} has merge issues".format(hex_file_path))
+        except AddressOverlapError as e:
+            raise AddressOverlapError("{0} while merging hex file {1} among {2} into {3}".format(str(e), hex_file_path, str(input_hex_files), output))
 
         print("Merged {}".format(hex_file_path))
 
