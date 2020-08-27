@@ -22,6 +22,7 @@
 
 #include <arm_cmse.h>
 #include <zephyr/types.h>
+#include <wrap_func.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -305,6 +306,45 @@ typedef void __attribute__((cmse_nonsecure_call)) (*tz_ns_func_ptr_t) (void);
 	__attribute__((cmse_nonsecure_entry, noinline))
 
 #endif /* CONFIG_ARM_FIRMWARE_HAS_SECURE_ENTRY_FUNCS */
+
+/**
+ * @brief Name of a non-secure entry function if it is to be wrapped.
+ */
+#define __TZ_NSC_NAME(name) nsc_ ## name
+
+/**
+ * @brief Create a thread safe wrapper function for an NS entry function.
+ *
+ * This locks the scheduler before calling the function by wrapping the NS entry
+ * function in @ref k_sched_lock / @ref k_sched_unlock, using @ref WRAP_FUNC.
+ *
+ * In secure code:
+ *
+ *	__TZ_NONSECURE_ENTRY_FUNC int __TZ_NSC_NAME(foo)(char *arg)
+ *	{ ... }
+ *
+ * In non-secure code:
+ *
+ *	int foo(char *arg);
+ *	__TZ_NONSECURE_ENTRY_FUNC_WRAPPER(int, foo, char *arg)
+ *
+ * Usage in non-secure code:
+ *
+ *	int ret = foo("my arg");
+ *
+ * If NS entry functions are called without such a wrapper, and a thread switch
+ * happens while execution is in the secure binary, the possibly app will crash
+ * upon returning to the non-secure binary.
+ *
+ * @param ret   The return type of the NS entry function.
+ * @param name  The desired name of the safe function. This assumes there is a
+ *              corresponding NS entry function called __TZ_NSC_NAME(name).
+ * @param ...   The rest of the signature of the function. This must be the same
+ *              signature as the corresponding NS entry function.
+ */
+#define __TZ_NONSECURE_ENTRY_FUNC_WRAPPER(ret, name, ...) \
+	ret __attribute__((naked)) name(__VA_ARGS__) \
+	WRAP_FUNC(k_sched_lock, __TZ_NSC_NAME(name), k_sched_unlock)
 
 /**
  * @brief Declare a pointer of non-secure function type
