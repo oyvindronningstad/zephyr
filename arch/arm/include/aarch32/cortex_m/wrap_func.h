@@ -18,6 +18,8 @@
 
 #else
 
+#ifdef CONFIG_CPU_CORTEX_M
+
 /**
  * @brief Macro for "sandwiching" a function call (@p name) in two other calls
  *
@@ -88,7 +90,7 @@
  * See @ref WRAP_FUNC_RAW for more information.
  */
 #define WRAP_FUNC(preface, name, postface) \
-	WRAP_FUNC_RAW(preface, name, postface, "push {lr}", "pop {pc}")
+	WRAP_FUNC_RAW(preface, name, postface, "push {r4, lr}", "pop {r4, pc}")
 
 /**
  * @brief Macro for "sandwiching" a function call (@p name) in two other calls
@@ -121,11 +123,16 @@
  *       warning for functions with a return value. It also saves a bit of space
  *       since it removes a little code that is not necessary.
  *
+ * @note This macro is not available on ARMV6-m and ARMv8-m Baseline, because
+ *       str/ldr on high registers is not supported.
+ *
  * See @ref WRAP_FUNC_RAW for more information.
  */
+#ifndef CONFIG_ARMV6_M_ARMV8_M_BASELINE
 #define WRAP_FUNC_STACK_ARGS(preface, name, postface) \
 	WRAP_FUNC_RAW(preface, name, postface, "str lr, %0" :: "m" (lr_bak), \
 			"ldr pc, %0" :: "m" (lr_bak))
-
+#endif /* CONFIG_ARMV6_M_ARMV8_M_BASELINE */
+#endif /* CONFIG_CPU_CORTEX_M */
 #endif /* _ASMLANGUAGE */
 #endif /* ZEPHYR_ARCH_ARM_INCLUDE_AARCH32_CORTEX_M_WRAP_FUNC_H_ */

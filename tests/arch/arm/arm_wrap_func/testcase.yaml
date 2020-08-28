@@ -1,4 +1,4 @@
 tests:
   arch.wrap_func.arm:
     tags: arm wrap_func
-    arch_allow: arm
+    filter: CONFIG_CPU_CORTEX_M
