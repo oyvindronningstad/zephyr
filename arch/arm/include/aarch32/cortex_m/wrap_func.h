@@ -18,8 +18,6 @@
 
 #else
 
-#ifdef CONFIG_CPU_CORTEX_M
-
 /**
  * @brief Macro for "sandwiching" a function call (@p name) in two other calls
  *
@@ -41,7 +39,7 @@
  * @param load_lr   The assembly instruction for restoring the LR value after
  *                  the functions have been called.
  */
-#define WRAP_FUNC_RAW(preface, name, postface, store_lr, load_lr) \
+#define Z_ARM_WRAP_FUNC_RAW(preface, name, postface, store_lr, load_lr) \
 	do { \
 		__asm(".global "#preface"; .type "#preface", %function"); \
 		__asm(".global "#name"; .type "#name", %function"); \
@@ -87,10 +85,10 @@
  *       warning for functions with a return value. It also saves a bit of space
  *       since it removes a little code that is not necessary.
  *
- * See @ref WRAP_FUNC_RAW for more information.
+ * See @ref Z_ARM_WRAP_FUNC_RAW for more information.
  */
 #define WRAP_FUNC(preface, name, postface) \
-	WRAP_FUNC_RAW(preface, name, postface, "push {r4, lr}", "pop {r4, pc}")
+	Z_ARM_WRAP_FUNC_RAW(preface, name, postface, "push {r4, lr}", "pop {r4, pc}")
 
 /**
  * @brief Macro for "sandwiching" a function call (@p name) in two other calls
@@ -100,18 +98,18 @@
  * alignment.
  *
  * This means LR cannot be stored on the stack, so it must be stored in an extra
- * argument called lr_bak, see example below.
+ * argument called lr_backup, see example below.
  *
  *	int foo(char *arg1, char *arg2, int arg3, uint64 arg4);
  *	int __attribute__((naked)) foo_wrapped(char *arg1, char *arg2, int arg3,
- *						uint64 arg4, uint32_t lr_bak)
+ *						uint64 arg4, uint32_t lr_backup)
  *		{WRAP_FUNC_STACK_ARGS(bar, foo, baz)}
  *
  * is equivalent to
  *
  *	int foo(char *arg1, char *arg2, int arg3, uint64 arg4);
  *	int foo_wrapped(char *arg1, char *arg2, int arg3, uint64 arg4,
- *			uint32_t lr_bak)
+ *			uint32_t lr_backup)
  *	{
  *		bar();
  *		int res = foo(arg1, arg2, arg3, arg4);
@@ -126,13 +124,13 @@
  * @note This macro is not available on ARMV6-m and ARMv8-m Baseline, because
  *       str/ldr on high registers is not supported.
  *
- * See @ref WRAP_FUNC_RAW for more information.
+ * See @ref Z_ARM_WRAP_FUNC_RAW for more information.
  */
 #ifndef CONFIG_ARMV6_M_ARMV8_M_BASELINE
 #define WRAP_FUNC_STACK_ARGS(preface, name, postface) \
-	WRAP_FUNC_RAW(preface, name, postface, "str lr, %0" :: "m" (lr_bak), \
-			"ldr pc, %0" :: "m" (lr_bak))
+	Z_ARM_WRAP_FUNC_RAW(preface, name, postface, \
+			"str lr, %0" :: "m" (lr_backup), \
+			"ldr pc, %0" :: "m" (lr_backup))
 #endif /* CONFIG_ARMV6_M_ARMV8_M_BASELINE */
-#endif /* CONFIG_CPU_CORTEX_M */
 #endif /* _ASMLANGUAGE */
 #endif /* ZEPHYR_ARCH_ARM_INCLUDE_AARCH32_CORTEX_M_WRAP_FUNC_H_ */
