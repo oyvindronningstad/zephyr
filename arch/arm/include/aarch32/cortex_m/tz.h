@@ -316,7 +316,8 @@ typedef void __attribute__((cmse_nonsecure_call)) (*tz_ns_func_ptr_t) (void);
  * @brief Create a thread safe wrapper function for an NS entry function.
  *
  * This locks the scheduler before calling the function by wrapping the NS entry
- * function in @ref k_sched_lock / @ref k_sched_unlock, using @ref WRAP_FUNC.
+ * function in @ref k_sched_lock / @ref k_sched_unlock, using
+ * @ref Z_ARM_WRAP_FUNC.
  *
  * In secure code:
  *
@@ -344,7 +345,7 @@ typedef void __attribute__((cmse_nonsecure_call)) (*tz_ns_func_ptr_t) (void);
  */
 #define __TZ_NONSECURE_ENTRY_FUNC_WRAPPER(ret, name, ...) \
 	ret __attribute__((naked)) name(__VA_ARGS__) \
-	WRAP_FUNC(k_sched_lock, __TZ_NSC_NAME(name), k_sched_unlock)
+	Z_ARM_WRAP_FUNC(k_sched_lock, __TZ_NSC_NAME(name), k_sched_unlock)
 
 /**
  * @brief Declare a pointer of non-secure function type
