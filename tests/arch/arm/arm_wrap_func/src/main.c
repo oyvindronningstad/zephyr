@@ -86,6 +86,14 @@ uint64_t __attribute__((naked)) wrap_foo2(uint32_t arg1, uint32_t arg2,
 	{Z_ARM_WRAP_FUNC_STACK_ARGS(preface, foo2, postface); }
 #endif
 
+#ifdef CONFIG_ARMV6_M_ARMV8_M_BASELINE
+#define GET_MSP(dst) __asm("mov %0,MSP" : "=rm" (dst))
+#define GET_PSP(dst) __asm("mov %0,PSP" : "=rm" (dst))
+#else
+#define GET_MSP(dst) dst = __get_MSP()
+#define GET_PSP(dst) dst = __get_PSP()
+#endif
+
 void test_arm_wrap_func(void)
 {
 	reset_mocks();
@@ -96,14 +104,14 @@ void test_arm_wrap_func(void)
 	foo1_arg4 = 0x456789ab;
 
 	uint32_t msp1, msp2, psp1, psp2;
-	__asm("mov %0,MSP" : "=rm" (msp1));
-	__asm("mov %0,PSP" : "=rm" (psp1));
+	GET_MSP(msp1);
+	GET_PSP(psp1);
 
 	zassert_equal(foo1_retval,
 		wrap_foo1(foo1_arg1, foo1_arg2, foo1_arg3, foo1_arg4), "9");
 
-	__asm("mov %0,MSP" : "=rm" (msp2));
-	__asm("mov %0,PSP" : "=rm" (psp2));
+	GET_MSP(msp2);
+	GET_PSP(psp2);
 
 	zassert_equal(msp1, msp2, NULL);
 	zassert_equal(psp1, psp2, NULL);
@@ -126,8 +134,11 @@ void test_arm_wrap_func(void)
 		"wrong retval. Was 0x%"PRIx64", expected 0x%"PRIx64, ret2,
 		foo2_retval);
 
-	zassert_equal(msp1, __get_MSP(), NULL);
-	zassert_equal(psp1, __get_PSP(), NULL);
+	GET_MSP(msp2);
+	GET_PSP(psp2);
+
+	zassert_equal(msp1, msp2, NULL);
+	zassert_equal(psp1, psp2, NULL);
 
 	zassert_true(preface_called, NULL);
 	zassert_true(foo2_called, NULL);
