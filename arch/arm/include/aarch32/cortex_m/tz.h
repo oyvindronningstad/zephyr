@@ -22,7 +22,7 @@
 
 #include <arm_cmse.h>
 #include <zephyr/types.h>
-#include <wrap_func.h>
+#include <../arch/arm/include/aarch32/cortex_m/wrap_func.h>
 
 #ifdef __cplusplus
 extern "C" {
