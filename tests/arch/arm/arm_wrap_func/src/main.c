@@ -78,12 +78,12 @@ uint64_t foo2(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint64_t arg4)
 
 uint32_t __attribute__((naked)) wrap_foo1(uint32_t arg1, uint32_t arg2,
 				uint32_t arg3, uint32_t arg4)
-	{WRAP_FUNC(preface, foo1, postface); }
+	{Z_ARM_WRAP_FUNC(preface, foo1, postface); }
 
 #ifndef CONFIG_ARMV6_M_ARMV8_M_BASELINE
 uint64_t __attribute__((naked)) wrap_foo2(uint32_t arg1, uint32_t arg2,
 			uint32_t arg3, uint64_t arg4, uint32_t lr_backup)
-	{WRAP_FUNC_STACK_ARGS(preface, foo2, postface); }
+	{Z_ARM_WRAP_FUNC_STACK_ARGS(preface, foo2, postface); }
 #endif
 
 void test_arm_wrap_func(void)

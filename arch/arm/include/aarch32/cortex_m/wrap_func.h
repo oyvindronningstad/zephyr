@@ -21,7 +21,8 @@
 /**
  * @brief Macro for "sandwiching" a function call (@p name) in two other calls
  *
- * This macro should be called via @ref WRAP_FUNC or @ref WRAP_FUNC_STACK_ARGS.
+ * This macro should be called via @ref Z_ARM_WRAP_FUNC or
+ * @ref Z_ARM_WRAP_FUNC_STACK_ARGS.
  *
  * This macro creates the function body of an "outer" function which behaves
  * exactly like the wrapped function (@p name), except that the preface function
@@ -68,7 +69,7 @@
  *
  *	int foo(char *arg); // Implemented elsewhere.
  *	int __attribute__((naked)) foo_wrapped(char *arg)
- *		{WRAP_FUNC(bar, foo, baz)}
+ *		{Z_ARM_WRAP_FUNC(bar, foo, baz)}
  *
  * is equivalent to
  *
@@ -87,8 +88,9 @@
  *
  * See @ref Z_ARM_WRAP_FUNC_RAW for more information.
  */
-#define WRAP_FUNC(preface, name, postface) \
-	Z_ARM_WRAP_FUNC_RAW(preface, name, postface, "push {r4, lr}", "pop {r4, pc}")
+#define Z_ARM_WRAP_FUNC(preface, name, postface) \
+	Z_ARM_WRAP_FUNC_RAW(preface, name, postface, "push {r4, lr}", \
+			"pop {r4, pc}")
 
 /**
  * @brief Macro for "sandwiching" a function call (@p name) in two other calls
@@ -103,7 +105,7 @@
  *	int foo(char *arg1, char *arg2, int arg3, uint64 arg4);
  *	int __attribute__((naked)) foo_wrapped(char *arg1, char *arg2, int arg3,
  *						uint64 arg4, uint32_t lr_backup)
- *		{WRAP_FUNC_STACK_ARGS(bar, foo, baz)}
+ *		{Z_ARM_WRAP_FUNC_STACK_ARGS(bar, foo, baz)}
  *
  * is equivalent to
  *
@@ -127,7 +129,7 @@
  * See @ref Z_ARM_WRAP_FUNC_RAW for more information.
  */
 #ifndef CONFIG_ARMV6_M_ARMV8_M_BASELINE
-#define WRAP_FUNC_STACK_ARGS(preface, name, postface) \
+#define Z_ARM_WRAP_FUNC_STACK_ARGS(preface, name, postface) \
 	Z_ARM_WRAP_FUNC_RAW(preface, name, postface, \
 			"str lr, %0" :: "m" (lr_backup), \
 			"ldr pc, %0" :: "m" (lr_backup))
