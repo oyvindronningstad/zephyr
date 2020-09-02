@@ -76,15 +76,11 @@ uint64_t foo2(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint64_t arg4)
 }
 #endif
 
-uint32_t __attribute__((naked)) wrap_foo1(uint32_t arg1, uint32_t arg2,
-				uint32_t arg3, uint32_t arg4)
-	{Z_ARM_WRAP_FUNC(preface, foo1, postface); }
+WRAP_4(uint32_t, preface, foo1, postface,
+	wrap_foo1, uint32_t, arg1, uint32_t, arg2, uint32_t, arg3, uint32_t, arg4)
 
-#ifndef CONFIG_ARMV6_M_ARMV8_M_BASELINE
-uint64_t __attribute__((naked)) wrap_foo2(uint32_t arg1, uint32_t arg2,
-			uint32_t arg3, uint64_t arg4, uint32_t lr_backup)
-	{Z_ARM_WRAP_FUNC_STACK_ARGS(preface, foo2, postface); }
-#endif
+WRAP_4(uint64_t, preface, foo2, postface,
+	wrap_foo2, uint32_t, arg1, uint32_t, arg2, uint32_t, arg3, uint64_t, arg4)
 
 #ifdef CONFIG_ARMV6_M_ARMV8_M_BASELINE
 #define GET_MSP(dst) __asm("mov %0,MSP" : "=rm" (dst))
@@ -128,8 +124,7 @@ void test_arm_wrap_func(void)
 	foo2_arg3 = 0x3456789b;
 	foo2_arg4 = 0x456789abc;
 
-	uint64_t ret2 = wrap_foo2(foo2_arg1, foo2_arg2, foo2_arg3, foo2_arg4,
-				0);
+	uint64_t ret2 = wrap_foo2(foo2_arg1, foo2_arg2, foo2_arg3, foo2_arg4);
 	zassert_equal(foo2_retval, ret2,
 		"wrong retval. Was 0x%"PRIx64", expected 0x%"PRIx64, ret2,
 		foo2_retval);

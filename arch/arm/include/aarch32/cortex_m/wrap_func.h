@@ -134,5 +134,74 @@
 			"str lr, %0" :: "m" (lr_backup), \
 			"ldr pc, %0" :: "m" (lr_backup))
 #endif /* CONFIG_ARMV6_M_ARMV8_M_BASELINE */
+
+
+#define WRAP_INTRO(ret_type, name, ...) \
+	static inline ret_type name(__VA_ARGS__)
+
+#define WRAP_BODY(ret_type, preface, postface, wrapped_name, ...) \
+	{ \
+		preface(); \
+		ret_type ret = wrapped_name(__VA_ARGS__); \
+		postface(); \
+		return ret; \
+	}
+
+#define WRAP_BODY_VOID(preface, postface, wrapped_name, ...) \
+	{ \
+		preface(); \
+		wrapped_name(__VA_ARGS__); \
+		postface(); \
+	}
+
+#define WRAP_0(ret_type, preface, wrapped_name, postface, name) \
+	WRAP_INTRO(ret_type, name) \
+	WRAP_BODY(ret_type, preface, postface, wrapped_name)
+
+#define WRAP_VOID_0(preface, wrapped_name, postface, name) \
+	WRAP_INTRO(void, name) \
+	WRAP_BODY_VOID(preface, postface, wrapped_name)
+
+#define WRAP_1(ret_type, preface, wrapped_name, postface, name, arg1_t, arg1) \
+	WRAP_INTRO(ret_type, name, arg1_t arg1) \
+	WRAP_BODY(ret_type, preface, postface, wrapped_name, arg1)
+
+#define WRAP_VOID_1(preface, wrapped_name, postface, name, arg1_t, arg1) \
+	WRAP_INTRO(void, name, arg1_t arg1) \
+	WRAP_BODY_VOID(preface, postface, wrapped_name, arg1)
+
+#define WRAP_2(ret_type, preface, wrapped_name, postface, name, arg1_t, arg1, \
+							arg2_t, arg2) \
+	WRAP_INTRO(ret_type, name, arg1_t arg1, arg2_t, arg2) \
+	WRAP_BODY(ret_type, preface, postface, wrapped_name, arg1, arg2)
+
+#define WRAP_VOID_2(preface, wrapped_name, postface, name, arg1_t, arg1, \
+							arg2_t, arg2) \
+	WRAP_INTRO(ret_type, name, arg1_t arg1, arg2_t arg2) \
+	WRAP_BODY_VOID(preface, postface, wrapped_name, arg1, arg2)
+
+#define WRAP_3(ret_type, preface, wrapped_name, postface, name, arg1_t, arg1, \
+						arg2_t, arg2, arg3_t, arg3) \
+	WRAP_INTRO(ret_type, name, arg1_t arg1, arg2_t arg2, arg3_t arg3) \
+	WRAP_BODY(ret_type, preface, postface, wrapped_name, arg1, arg2, arg3)
+
+#define WRAP_VOID_3(preface, wrapped_name, postface, name, arg1_t, arg1, \
+					arg2_t, arg2, arg3_t, arg3) \
+	WRAP_INTRO(ret_type, name, arg1_t arg1, arg2_t arg2, arg3_t arg3) \
+	WRAP_BODY_VOID(preface, postface, wrapped_name, arg1, arg2, arg3)
+
+#define WRAP_4(ret_type, preface, wrapped_name, postface, name, arg1_t, arg1, \
+				arg2_t, arg2, arg3_t, arg3, arg4_t, arg4) \
+	WRAP_INTRO(ret_type, name, arg1_t arg1, arg2_t arg2, arg3_t arg3, \
+				   arg4_t arg4) \
+	WRAP_BODY(ret_type, preface, postface, wrapped_name, arg1, arg2, arg3, \
+							arg4)
+
+#define WRAP_VOID_4(preface, wrapped_name, postface, name, arg1_t, arg1, \
+				arg2_t, arg2, arg3_t, arg3, arg4_t, arg4) \
+	WRAP_INTRO(ret_type, name, arg1_t arg1, arg2_t arg2, arg3_t arg3, \
+				   arg4_t arg4) \
+	WRAP_BODY_VOID(preface, postface, wrapped_name, arg1, arg2, arg3, arg4)
+
 #endif /* _ASMLANGUAGE */
 #endif /* ZEPHYR_ARCH_ARM_INCLUDE_AARCH32_CORTEX_M_WRAP_FUNC_H_ */
