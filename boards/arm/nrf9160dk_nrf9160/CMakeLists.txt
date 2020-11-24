@@ -16,6 +16,11 @@ if (CONFIG_BUILD_WITH_TFM)
 		set(TFM_IMAGE_VERSION_NS 0.0.0+0)
 	endif()
 
+	set (COMBINED_BIN ${CMAKE_BINARY_DIR}/tfm_s_zephyr_ns_sign.bin)
+	if (CONFIG_TFM_NATIVE_NS)
+		set(COMBINED_BIN $<TARGET_PROPERTY:tfm,NATIVE_SIGNED_BIN_PATH>)
+	endif()
+
 	set(PREPROCESSED_FILE_S "${CMAKE_BINARY_DIR}/tfm/bl2/ext/mcuboot/CMakeFiles/signing_layout_s.dir/signing_layout_s.o")
 	set(PREPROCESSED_FILE_NS "${CMAKE_BINARY_DIR}/tfm/bl2/ext/mcuboot/CMakeFiles/signing_layout_ns.dir/signing_layout_ns.o")
 	set(TFM_MCUBOOT_DIR "${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/bl2/ext/mcuboot")
@@ -68,7 +73,12 @@ if (CONFIG_BUILD_WITH_TFM)
 		     --layout ${PREPROCESSED_FILE_S}
 			 -s ${CMAKE_BINARY_DIR}/tfm_s_signed.bin
 			 -n ${CMAKE_BINARY_DIR}/zephyr_ns_signed.bin
-			 -o ${CMAKE_BINARY_DIR}/tfm_sign.bin
+			 -o ${CMAKE_BINARY_DIR}/tfm_s_zephyr_ns_sign.bin
+
+		#Copy combined signed binary file
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${COMBINED_BIN}
+		${CMAKE_BINARY_DIR}/tfm_sign.bin
 
 		#Copy mcuboot.bin
 		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/tfm/bin/bl2.bin ${CMAKE_BINARY_DIR}/mcuboot.bin
